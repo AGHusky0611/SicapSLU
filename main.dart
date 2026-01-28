@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/constants/api_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase with your project credentials
   await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+    url: ApiConstants.supabaseUrl,
+    anonKey: ApiConstants.supabaseAnonKey,
   );
 
   runApp(const SicapApp());
@@ -24,7 +23,7 @@ class SicapApp extends StatelessWidget {
     return MaterialApp(
       title: 'SICAP Portal',
       debugShowCheckedModeBanner: false,
-      theme: SicapTheme.lightTheme, // Uses the theme we built earlier
+      theme: SicapTheme.lightTheme,
       home: const AuthWrapper(),
     );
   }
@@ -35,7 +34,6 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This listener automatically rebuilds the UI when the session changes
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
       builder: (context, snapshot) {
@@ -45,32 +43,14 @@ class AuthWrapper extends StatelessWidget {
 
         final session = snapshot.data?.session;
 
-        // If no session exists, show the login screen
+        // Redirect to login if no session exists
         if (session == null) {
           return const SicapLoginPage();
         }
 
-        // If logged in, show the Dashboard Shell (which we'll build next)
-        return const DashboardShell();
+        // Proceed to dashboard if authenticated
+        return const Scaffold(body: Center(child: Text("Welcome to SICAP Dashboard")));
       },
-    );
-  }
-}
-
-// Temporary placeholder for your Modular Dashboard
-class DashboardShell extends StatelessWidget {
-  const DashboardShell({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("SICAP Dashboard")),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => AuthService().signOut(),
-          child: const Text("Sign Out"),
-        ),
-      ),
     );
   }
 }
