@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
-import '../core/constants/colors.dart'; // Import your SicapColors
+import '../../../services/auth_service.dart';
+import '../../../core/constants/colors.dart';
 
-class SicapLoginPage extends StatelessWidget {
+class SicapLoginPage extends StatefulWidget {
+  const SicapLoginPage({super.key});
+
+  @override
+  State<SicapLoginPage> createState() => _SicapLoginPageState();
+}
+
+class _SicapLoginPageState extends State<SicapLoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,123 +29,76 @@ class SicapLoginPage extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           child: Container(
-            width: 400, // Fixed width for the "Centered Card" look
-            margin: EdgeInsets.symmetric(horizontal: 20),
+            width: 400,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: SicapColors.surface,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: Offset(0, 10),
-                )
-              ],
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20, offset: const Offset(0, 10))],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1. THE BLUE HEADER
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  decoration: BoxDecoration(
-                    color: SicapColors.primaryBlue,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.business_center, color: Colors.white, size: 50),
-                      SizedBox(height: 10),
-                      Text(
-                        "SICAP",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 2. THE FORM AREA
-                Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Welcome Back",
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "Please enter your credentials to access your portal.",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 32),
-
-                      // Email Field
-                      Text("Email Address", style: TextStyle(fontWeight: FontWeight.w600)),
-                      SizedBox(height: 8),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: "name@sicap.org",
-                          // The theme already handles borders from app_theme.dart
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                      ),
-                      SizedBox(height: 24),
-
-                      // Password Field
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Password", style: TextStyle(fontWeight: FontWeight.w600)),
-                          TextButton(onPressed: () {}, child: Text("Forgot?")),
-                        ],
-                      ),
-                      TextField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: "••••••••",
-                          prefixIcon: Icon(Icons.lock_outline),
-                          suffixIcon: Icon(Icons.visibility_off_outlined),
-                        ),
-                      ),
-                      SizedBox(height: 32),
-
-                      // 3. THE YELLOW SIGN-IN BUTTON
-                      // The style is already set in app_theme.dart
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Sign In"),
-                            SizedBox(width: 10),
-                            Icon(Icons.logout_rounded),
-                          ],
-                        ),
-                      ),
-                      
-                      SizedBox(height: 24),
-                      Center(
-                        child: TextButton(
-                          onPressed: () {},
-                          child: Text("Don't have an account? Create Account"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader(),
+                _buildForm(),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      decoration: const BoxDecoration(
+        color: SicapColors.primaryBlue,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        children: const [
+          Icon(Icons.business_center, color: Colors.white, size: 50),
+          SizedBox(height: 10),
+          Text("SICAP", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Welcome Back", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text("Enter your credentials to access the SICAP portal.", style: TextStyle(color: Colors.grey[600])),
+          const SizedBox(height: 32),
+          TextField(controller: emailController, decoration: const InputDecoration(labelText: "Email Address", prefixIcon: Icon(Icons.email_outlined))),
+          const SizedBox(height: 24),
+          TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(labelText: "Password", prefixIcon: Icon(Icons.lock_outline))),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: SicapColors.actionYellow, foregroundColor: Colors.black),
+            onPressed: isLoading ? null : _handleLogin,
+            child: isLoading ? const CircularProgressIndicator() : const Text("Sign In"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() => isLoading = true);
+    try {
+      await _authService.signIn(emailController.text.trim(), passwordController.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login Failed: $e"), backgroundColor: Colors.red));
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 }
