@@ -1,0 +1,30 @@
+name: sicap_slu
+description: A new Flutter project for the SICAP portal.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Backend: Supabase for Auth and Database
+  supabase_flutter: ^2.5.0
+
+  # UI: Icons and specialized widgets
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  # If you add local images later (like a logo), they go here:
+  # assets:
+  #   - assets/images/sicap_logo.png

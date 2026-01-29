@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../services/auth_service.dart';
-import '../../../core/constants/colors.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../core/constants/colors.dart';
 
 class SicapLoginPage extends StatefulWidget {
   const SicapLoginPage({super.key});
